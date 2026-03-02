@@ -1,4 +1,6 @@
-from app import app
+from app import app, mail
+from app.forms import ContactForm
+from flask_mail import Message
 from flask import render_template, request, redirect, url_for, flash
 
 
@@ -8,7 +10,7 @@ from flask import render_template, request, redirect, url_for, flash
 
 @app.route('/')
 def home():
-    """Render website's home page."""
+    flash("Welcome to the site!", "info")
     return render_template('home.html')
 
 
@@ -59,6 +61,17 @@ def page_not_found(error):
 
 
 
-@app.route('/contact')
-    return render_template('contact.html')
-
+@app.route('/contact', methods=['GET', 'POST']) 
+def contact(): 
+    form = ContactForm() 
+    if form.validate_on_submit(): 
+        msg = Message( 
+            subject=form.subject.data, 
+            sender=form.email.data, 
+            recipients=["your_mailtrap_inbox@example.com"], 
+            body=form.message.data 
+        ) 
+        mail.send(msg) 
+        flash("Message sent successfully!", "success") 
+        return redirect(url_for('home')) 
+    return render_template('contact.html', form=form)
